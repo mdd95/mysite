@@ -2,8 +2,9 @@
   import { useEventListener } from 'runed';
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   import RAPIER from '@dimforge/rapier3d-compat';
-  import Dice3dModel from '$lib/assets/3dmodels/dice.glb?url';
+  import Dice3dModel from '$lib/assets/3dmodels/dice-transformed.glb?url';
 
   let canvasContainer: HTMLElement;
 
@@ -63,8 +64,13 @@
 
     let dice: THREE.Group | undefined = undefined;
 
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco/');
+    dracoLoader.preload();
+
     const loader = new GLTFLoader();
 
+    loader.setDRACOLoader(dracoLoader);
     loader.load(Dice3dModel, (glb) => {
       dice = glb.scene;
       dice.scale.set(0.1, 0.1, 0.1);
@@ -99,14 +105,14 @@
       world.createCollider(colliderDesc, rigidBody);
 
       function loop() {
+        requestAnimationFrame(loop);
         world.step();
         if (dice) {
           dice.position.copy(rigidBody.translation());
           dice.quaternion.copy(rigidBody.rotation());
         }
-        setTimeout(loop, 16);
       }
-      loop();
+      requestAnimationFrame(loop);
     });
 
     function animate() {
