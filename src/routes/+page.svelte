@@ -105,12 +105,12 @@
       world.createCollider(colliderDesc, rigidBody);
 
       function loop() {
-        requestAnimationFrame(loop);
         world.step();
         if (dice) {
           dice.position.copy(rigidBody.translation());
           dice.quaternion.copy(rigidBody.rotation());
         }
+        requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
     });
