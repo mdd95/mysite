@@ -5,10 +5,12 @@
   import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   import RAPIER from '@dimforge/rapier3d-compat';
   import Dice3dModel from '$lib/assets/3dmodels/dice-transformed.glb?url';
+  import { isMobile } from '$lib/utils';
 
   let canvasContainer: HTMLElement;
 
   $effect(() => {
+    const castShadow = !isMobile();
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -38,17 +40,21 @@
     scene.add(ambientLight);
 
     const light = new THREE.DirectionalLight(0xffffff, 2);
-    light.position.set(0, 1.2, -1.0);
-    light.castShadow = true;
-    light.shadow.mapSize.width = 2048;
-    light.shadow.mapSize.height = 2048;
+    light.position.set(0, 1.2, -0.8);
+    if (castShadow) {
+      light.castShadow = true;
+      light.shadow.mapSize.width = 2048;
+      light.shadow.mapSize.height = 2048;
+    }
     scene.add(light);
 
     const backlight = new THREE.DirectionalLight(0xffffff, 2);
-    backlight.position.set(0, 1.2, 1.0);
-    backlight.castShadow = true;
-    backlight.shadow.mapSize.width = 2048;
-    backlight.shadow.mapSize.height = 2048;
+    backlight.position.set(0, 1.2, 0.8);
+    if (castShadow) {
+      backlight.castShadow = true;
+      backlight.shadow.mapSize.width = 2048;
+      backlight.shadow.mapSize.height = 2048;
+    }
     scene.add(backlight);
 
     const ground = new THREE.Mesh(
@@ -59,7 +65,7 @@
         metalness: 1
       })
     );
-    ground.receiveShadow = true;
+    ground.receiveShadow = castShadow;
     scene.add(ground);
 
     let dice: THREE.Group | undefined = undefined;
@@ -75,11 +81,13 @@
       dice = glb.scene;
       dice.scale.set(0.1, 0.1, 0.1);
       dice.position.set(0, 10, 0);
-      dice.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-        }
-      });
+      if (castShadow) {
+        dice.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+          }
+        });
+      }
       scene.add(dice);
     });
 
